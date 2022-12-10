@@ -5,31 +5,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BibliotecaEntidades.Clases;
+using BibliotecaEntidades.Interfaces;
 
 namespace BibliotecaEntidades.DAO
 {
-    public static class UsuarioDao<T> where T : Usuario
+    public class UsuarioDao : BaseDAO, IClaseDAO<UsuarioDao>
     {
         private static SqlConnection _sqlConnection;
         private static SqlCommand _sqlCommand;
 
-        static UsuarioDao()
+        public UsuarioDao()
         {
-            _sqlConnection = new SqlConnection(@"
-                Data Source = .;
-                Database = prueba_sql_2;
-                Trusted_Connection = True;
-            ");
-            _sqlCommand = new SqlCommand();
-            _sqlCommand.Connection = _sqlConnection;
-            _sqlCommand.CommandType = System.Data.CommandType.Text;
+            
         }
 
-        public static List<T> GetAll()
+        public List<Usuario> GetAll()
         {
-            List<T> datos = new List<T>();
+            List<Usuario> datos = new List<Usuario>();
 
-            string command = TipoDeUsuarioConsulta(typeof(T));
+            string command = TipoDeUsuarioConsulta(typeof(Usuario));
 
             try
             {
