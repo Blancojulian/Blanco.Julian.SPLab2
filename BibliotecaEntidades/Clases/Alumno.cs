@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BibliotecaEntidades.DAO;
+using BibliotecaEntidades.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
@@ -7,22 +9,21 @@ using System.Threading.Tasks;
 
 namespace BibliotecaEntidades.Clases
 {
-    public class Alumno : Usuario
+    public class Alumno : Usuario, IAlumno
     {
         private int _cantidadMaterias;
-        private List<Materia> _materias;
 
-        private List<int> _idMaterias;
 
 
         public Alumno(int id, string nombre, string apellido, int dni) : base(id, nombre, apellido, dni)
         {
             this._cantidadMaterias = 0;
             this._nivelUsuario = ENivelUsuario.Alumno;
-            this._idMaterias = new List<int>();
+        }
+        public Alumno( string nombre, string apellido, int dni) : this(0, nombre, apellido, dni)
+        {
         }
 
-        public List<int> IdMaterias { get => _idMaterias; }
         public int CantidadMaterias {get => _cantidadMaterias; }
 
 
@@ -36,49 +37,37 @@ namespace BibliotecaEntidades.Clases
             return sb.ToString();
         }
 
-        public bool InscribirseAMateria(Materia materia)
+        public static int InscribirseAMateria(int codigoMateria, Alumno a)
         {
-            bool retorno = materia + this;
-
-            if (retorno)
-            {
-                this._materias.Add(materia);
-            }
-
-            return retorno;
+            return ClaseDAO.MateriaDao.Add(codigoMateria, a.Dni, new EstadoAlumno());
         }
 
-        public bool DarAsistenciaAMateria(Materia materia)
+        public int DarAsistenciaAMateria(int codigoMateria, int dniAlumno)
         {
-            return Materia.DarAsistencia(materia, this);
-        }
-
-
-
-        public static bool operator ==(Alumno a, int codigoMateria)
-        {
-            bool retorno = false;
-
-            foreach (Materia materia in a._materias)
+            int filas = 0;
+            try
             {
-                if (materia.CodigoMateria == codigoMateria)
+
+                EstadoAlumno? estadoAlumno = ClaseDAO.MateriaDao.Get(codigoMateria, dniAlumno);
+
+                if (estadoAlumno is not null)
                 {
-
-                    if (EEstadoMateria.Aprobada == Materia.GetEstadoMateriaAlumno(materia, a))
-                    {
-                        retorno = true;
-                        break;
-                    }
-
+                    estadoAlumno.Asistencia = true;
+                    
+                    filas = ClaseDAO.MateriaDao.Update(codigoMateria, dniAlumno, estadoAlumno);
+                }
+                else
+                {
+                    throw new Exception($"No existe alumno con el dni {dniAlumno}");
                 }
             }
+            catch (Exception)
+            {
 
-            return retorno;
-        }
+                throw;
+            }
 
-        public static bool operator !=(Alumno a, int codigoMateria)
-        {
-            return !(a == codigoMateria);
+            return filas;
         }
 
         public static explicit operator Alumno(SqlDataReader r)
@@ -93,6 +82,5 @@ namespace BibliotecaEntidades.Clases
             return a;
         }
 
-        public List<Materia> Materias { get { return new List<Materia>(this._materias); } }
     }
 }

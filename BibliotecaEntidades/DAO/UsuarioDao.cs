@@ -9,12 +9,10 @@ using BibliotecaEntidades.Interfaces;
 
 namespace BibliotecaEntidades.DAO
 {
-    public class UsuarioDao : BaseDAO, IClaseDAO<UsuarioDao>
+    public class UsuarioDao : BaseDAO, IClaseDAO<Usuario>, IUsuarioDAO<Usuario>, IComprobarLogin
     {
-        private static SqlConnection _sqlConnection;
-        private static SqlCommand _sqlCommand;
-
-        public UsuarioDao()
+        
+        public UsuarioDao() : base()
         {
             
         }
@@ -23,7 +21,45 @@ namespace BibliotecaEntidades.DAO
         {
             List<Usuario> datos = new List<Usuario>();
 
-            string command = TipoDeUsuarioConsulta(typeof(Usuario));
+            
+
+            try
+            {
+                _sqlCommand.CommandText = "SELECT * FROM usuarios";
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+
+                        datos.Add((Usuario)dataReader);
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return datos;
+        }
+
+        
+        public List<T> GetAll<T>() where T : Usuario
+        {
+            List<T> datos = new List<T>();
+
+            string command = TipoDeUsuarioConsulta(typeof(T));
 
             try
             {
@@ -41,9 +77,9 @@ namespace BibliotecaEntidades.DAO
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -54,9 +90,47 @@ namespace BibliotecaEntidades.DAO
             }
 
             return datos;
-        }
+        } 
+        
+        public Usuario? Get(int dni)
+        {
+            Usuario? usuario = null;
 
-        public static T? Get(int id)
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+
+                _sqlCommand.CommandText = "SELECT * FROM usuarios WHERE dni = @dni";
+
+                _sqlCommand.Parameters.AddWithValue("@dni", dni);
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    if (dataReader.Read())
+                    {
+
+                        usuario = (Usuario)dataReader;
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return usuario;
+        }
+        public T? Get<T>(int dni) where T : Usuario
         {
             T? datos = default;
 
@@ -64,9 +138,9 @@ namespace BibliotecaEntidades.DAO
             {
                 _sqlCommand.Parameters.Clear();
 
-                _sqlCommand.CommandText = "SELECT * FROM usuarios WHERE id = @id";
+                _sqlCommand.CommandText = "SELECT * FROM usuarios WHERE dni = @dni";
 
-                _sqlCommand.Parameters.AddWithValue("@id", id);
+                _sqlCommand.Parameters.AddWithValue("@dni", dni);
                 _sqlConnection.Open();
 
                 using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
@@ -80,9 +154,9 @@ namespace BibliotecaEntidades.DAO
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -96,7 +170,7 @@ namespace BibliotecaEntidades.DAO
         }
 
 
-        public static int Add(T datos)
+        public int Add(Usuario datos)
         {
             int filas = 0;
             try
@@ -105,18 +179,20 @@ namespace BibliotecaEntidades.DAO
 
                 _sqlConnection.Open();
                 //(nombre, apellido, dni, id_nivel_usuario)
-                _sqlCommand.CommandText = "INSERT INTO usuarios VALUES(@nombre, @apellido, @dni, @tipoUsuario)";
+                _sqlCommand.CommandText = "INSERT INTO usuarios VALUES(@nombre, @apellido, @dni, @tipoUsuario, @contrasenia)";
 
                 _sqlCommand.Parameters.AddWithValue("@nombre", datos.Nombre);
                 _sqlCommand.Parameters.AddWithValue("@apellido", datos.Apellido);
                 _sqlCommand.Parameters.AddWithValue("@dni", datos.Dni);
                 _sqlCommand.Parameters.AddWithValue("@tipoUsuario", (int)datos.NivelUsuario);
+                _sqlCommand.Parameters.AddWithValue("@contrasenia", "123");
+
 
                 filas = _sqlCommand.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -129,7 +205,42 @@ namespace BibliotecaEntidades.DAO
             return filas;
         }
 
-        public static int Update(int id, T datos)
+        public int Add<T>(T datos, string contrasenia) where T : Usuario
+        {
+            int filas = 0;
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+
+                _sqlConnection.Open();
+
+                _sqlCommand.CommandText = "INSERT INTO usuarios VALUES(@nombre, @apellido, @dni, @tipoUsuario, @contrasenia)";
+
+                _sqlCommand.Parameters.AddWithValue("@nombre", datos.Nombre);
+                _sqlCommand.Parameters.AddWithValue("@apellido", datos.Apellido);
+                _sqlCommand.Parameters.AddWithValue("@dni", datos.Dni);
+                _sqlCommand.Parameters.AddWithValue("@tipoUsuario", (int)datos.NivelUsuario);
+                _sqlCommand.Parameters.AddWithValue("@contrasenia", contrasenia);
+
+
+                filas = _sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return filas;
+        }
+
+        public int Update(int id, Usuario datos)
         {
             int filas = 0;
             try
@@ -148,9 +259,9 @@ namespace BibliotecaEntidades.DAO
 
                 filas = _sqlCommand.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -163,7 +274,7 @@ namespace BibliotecaEntidades.DAO
             return filas;
         }
 
-        public static int Delete(int id)
+        public int Delete(int id)
         {
             int filas = 0;
             try
@@ -178,9 +289,9 @@ namespace BibliotecaEntidades.DAO
 
                 filas = _sqlCommand.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -214,6 +325,48 @@ namespace BibliotecaEntidades.DAO
             }
 
             return command;
+        }
+
+        public T? ComprobarLogin<T>(string nombre, string contrasenia, int dni) where T : Usuario
+        {
+            T? usuario = default;
+
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+
+                _sqlCommand.CommandText = "SELECT * FROM usuarios WHERE nombre = @nombre AND contrasenia = @contrasenia AND dni = @dni";
+
+                _sqlCommand.Parameters.AddWithValue("@nombre", nombre);
+                _sqlCommand.Parameters.AddWithValue("@contrasenia", contrasenia);
+                _sqlCommand.Parameters.AddWithValue("@dni", dni);
+
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    if (dataReader.Read())
+                    {
+
+                        usuario = (T)dataReader;
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return usuario;
         }
     }
 }

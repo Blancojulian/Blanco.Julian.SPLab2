@@ -4,56 +4,67 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BibliotecaEntidades.DAO;
+using BibliotecaEntidades.Interfaces;
 
 namespace BibliotecaEntidades.Clases
 {
-    public class Profesor : Usuario
+    public class Profesor : Usuario, IProfesor
     {
-        private List<Materia> _materias;
-        private List<int> _idMaterias;
+        
 
         public Profesor(int id, string nombre, string apellido, int dni) : base(id, nombre, apellido, dni)
         {
             this._nivelUsuario = ENivelUsuario.Profesor;
-            this._materias = new List<Materia>();
+        }
+        public Profesor(string nombre, string apellido, int dni) : base(0, nombre, apellido, dni)
+        {
+            this._nivelUsuario = ENivelUsuario.Profesor;
         }
 
-        public bool AgregarExamen(Materia materia, string nombre, DateTime fecha)
+        public int AgregarExamen(int codigoMateria, EExamen examen)
         {
-            bool retorno = false;
+            return ClaseDAO.MateriaDao.AgregarExamen(codigoMateria, examen);
+        }
 
-            if(materia == this)
+        public int AgregarNota(int codigoMateria, int dniAlumno, EExamen examen, int nota)
+        {
+            int filas = 0;
+            try
             {
-                retorno = materia + new Examen(nombre, fecha);
-            }
-            return retorno;
-        }
+                
+                EstadoAlumno? estadoAlumno = ClaseDAO.MateriaDao.Get(codigoMateria, dniAlumno);
 
-        public bool AgregarNota(Materia materia, Alumno alumno, bool primerExamen, int nota)
-        {
-            return Materia.DarNota(materia, this, alumno, primerExamen, nota);
-        }
-
-        public static bool operator +(Profesor p, Materia m)
-        {
-            bool retorno = true;
-
-            foreach (Materia materia in p._materias)
-            {
-                if (materia == m)
+                if (estadoAlumno is not null)
                 {
-                    retorno = false;
-                    break;
+                    if (examen == EExamen.Primer)
+                    {
+                        estadoAlumno.PrimerExamen.Nota = nota;
+                        estadoAlumno.PrimerExamen.Rendido = true;
+                    }
+                    else if (examen == EExamen.Segundo)
+                    {
+                        estadoAlumno.SegundoExamen.Nota = nota;
+                        estadoAlumno.SegundoExamen.Rendido = true;
+                    }
+                    
+                    filas = ClaseDAO.MateriaDao.Update(codigoMateria, dniAlumno, estadoAlumno);
+                }
+                else
+                {
+                    throw new Exception($"No existe alumno con el dni {dniAlumno}");
                 }
             }
-
-            if (retorno)
+            catch (Exception)
             {
-                p._materias.Add(m);
-            }
 
-            return retorno;
+                throw;
+            }
+            
+            return filas;
         }
+
+        
 
         public static explicit operator Profesor(SqlDataReader r)
         {
@@ -67,9 +78,7 @@ namespace BibliotecaEntidades.Clases
             return p;
         }
 
-        public List<Materia> Materias { get { return new List<Materia>(this._materias); } }
-        public List<int> IdMaterias { get => new List<int>(this._idMaterias); }
+        
 
-        public string PrintMaterias { get => "matematica, historia y programacion"; }
     }
 }

@@ -10,38 +10,53 @@ namespace BibliotecaEntidades.Clases
     
     public class EstadoAlumno
     {
+        private string? _nombreCompleto;
+        private string? _nombreMateria;
         private EEstadoMateria _estadoMateria;
         private bool _asistencia;
         private EEstadoAlumno _estadoAlumno;
-        private Examen? _primerExamen;
-        private Examen? _segundoExamen;
+        private EstadoExamen _primerExamen;
+        private EstadoExamen _segundoExamen;
 
-
-        public EstadoAlumno(EEstadoMateria estadoMateria, bool asistencia, EEstadoAlumno estadoAlumno)
+        public EstadoAlumno(EEstadoMateria estadoMateria, bool asistencia, EEstadoAlumno estadoAlumno,
+            int notaPrimerExamen, bool rendidoPrimerParcial,
+            int notaSegundoExamen, bool rendidoSegundoParcial,
+            string nombreMateria, string nombreCompleto)
         {
             this._estadoMateria = estadoMateria;
             this._asistencia = asistencia;
             this._estadoAlumno = estadoAlumno;
+            _primerExamen = new EstadoExamen(notaPrimerExamen, rendidoPrimerParcial);
+            _segundoExamen = new EstadoExamen(notaSegundoExamen, rendidoSegundoParcial);
+            _nombreMateria = nombreMateria;
+            _nombreCompleto = nombreCompleto;
         }
-
-        public EstadoAlumno() : this(EEstadoMateria.Cursando, false, EEstadoAlumno.Regular)
+        public EstadoAlumno(EEstadoMateria estadoMateria, bool asistencia, EEstadoAlumno estadoAlumno,
+            int notaPrimerExamen, bool rendidoPrimerParcial,
+            int notaSegundoExamen, bool rendidoSegundoParcial)
         {
-
+            this._estadoMateria = estadoMateria;
+            this._asistencia = asistencia;
+            this._estadoAlumno = estadoAlumno;
+            _primerExamen = new EstadoExamen(notaPrimerExamen, rendidoPrimerParcial);
+            _segundoExamen = new EstadoExamen(notaSegundoExamen, rendidoSegundoParcial);
         }
-
-        private EstadoAlumno(EEstadoMateria estadoMateria, bool asistencia, EEstadoAlumno estadoAlumno, Examen? primerExamen, Examen? segundoExamen) : this(estadoMateria, asistencia, estadoAlumno)
+        public EstadoAlumno() : this(EEstadoMateria.Cursando, false, EEstadoAlumno.Regular, 0, false, 0, false)
         {
-            PrimerExamen = primerExamen ?? null;
-            SegundoExamen = segundoExamen ?? null;
+           
         }
+        
 
         public static explicit operator EstadoAlumno(SqlDataReader r)
         {
-            return new EstadoAlumno(
-                (EEstadoMateria)Convert.ToInt32(r["id_estado_materia"]), 
-                Convert.ToBoolean(r["asistencia"]), 
-                (EEstadoAlumno)Convert.ToInt32(r["id_estado_alumno"]), (Examen)r, (Examen)r);
+            return new EstadoAlumno((EEstadoMateria)Convert.ToInt32(r["id_estado_materia"]), Convert.ToBoolean(r["asistencia"]), 
+                (EEstadoAlumno)Convert.ToInt32(r["id_estado_alumno"]), Convert.ToInt32(r["primer_nota"]),
+                Convert.ToBoolean(r["primero_rendido"]), Convert.ToInt32(r["segunda_nota"]), Convert.ToBoolean(r["segundoo_rendido"]),
+                r["nombre_materia"].ToString() ?? "", r["nombre_completo"].ToString() ?? "");
         }
+
+        public string? NombreCompleto { get => _nombreCompleto ?? "Sin asignar"; set => _nombreCompleto = value; }
+        public string? NombreMateria { get => _nombreMateria ?? "Sin asignar"; set => _nombreMateria = value; }
         public EEstadoAlumno Estado
         {
             get { return this._estadoAlumno; }
@@ -67,7 +82,32 @@ namespace BibliotecaEntidades.Clases
             set { this._asistencia = value; }
         }
 
-        public Examen? PrimerExamen { get => _primerExamen; set => _primerExamen ??= value; }
-        public Examen? SegundoExamen { get => _segundoExamen; set => _segundoExamen ??= value; }
+        public EstadoExamen PrimerExamen { get => _primerExamen; set => _primerExamen ??= value; }
+        public EstadoExamen SegundoExamen { get => _segundoExamen; set => _segundoExamen ??= value; }
+
+        public string NotaPrimerExamen { 
+            get
+            {
+                string retorno = "Sin rendir";
+                if (PrimerExamen.Rendido)
+                {
+                    retorno = $"{PrimerExamen.Nota}";
+                }
+                return retorno;
+            } 
+        }
+        public string NotaSegundoExamen
+        {
+            get
+            {
+                string retorno = "Sin rendir";
+                if (SegundoExamen.Rendido)
+                {
+                    retorno = $"{SegundoExamen.Nota}";
+                }
+                return retorno;
+            }
+        }
+
     }
 }

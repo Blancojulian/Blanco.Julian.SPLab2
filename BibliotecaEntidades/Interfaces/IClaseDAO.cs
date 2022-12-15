@@ -8,10 +8,10 @@ namespace BibliotecaEntidades.Interfaces
 {
     public interface IClaseDAO <T>
     {
-        public static List<T> GetAll();
-        public T Get(int id);
-        public void Add(T datos);
-        public void Update(int id, T datos);
-        public void Delete(int id);
+        public List<T> GetAll();
+        public T? Get(int id);
+        public int Add(T datos);
+        public int Update(int id, T datos);
+        public int Delete(int id);
     }
 }

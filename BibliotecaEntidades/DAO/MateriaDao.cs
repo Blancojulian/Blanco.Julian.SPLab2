@@ -5,28 +5,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BibliotecaEntidades.Clases;
+using BibliotecaEntidades.Interfaces;
 
 namespace BibliotecaEntidades.DAO
 {
-    public static class MateriaDao
+    public class MateriaDao : BaseDAO, IClaseDAO<Materia>, IEstadoEnMateriaDAO
     {
-        private static SqlConnection _sqlConnection;
-        private static SqlCommand _sqlCommand;
-
-        static MateriaDao()
+        
+        public MateriaDao() : base()
         {
-            _sqlConnection = new SqlConnection(@"
-                Data Source = .;
-                Database = prueba_sql_2;
-                Trusted_Connection = True;
-            ");
-            _sqlCommand = new SqlCommand();
-            _sqlCommand.Connection = _sqlConnection;
-            _sqlCommand.CommandType = System.Data.CommandType.Text;
         }
-        //metodos privados aparte para lista de profesores, estados de los alumnos y los examenes
-        //mejor hacerr DAOs por lista de profesores, estados de los alumnos y los examenes
-        public static List<Materia> GetAll()
+        public List<Materia> GetAll()
         {
             List<Materia> datos = new List<Materia>();
 
@@ -46,9 +35,9 @@ namespace BibliotecaEntidades.DAO
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -60,17 +49,17 @@ namespace BibliotecaEntidades.DAO
 
             return datos;
         }
-        public static Materia? Get(int id)
+        public Materia? Get(int codigoMateria)
         {
-            Materia? datos = null;
+            Materia? materia = null;
 
             try
             {
                 _sqlCommand.Parameters.Clear();
 
-                _sqlCommand.CommandText = "SELECT * FROM materias WHERE id = @id";
+                _sqlCommand.CommandText = "SELECT * FROM materias WHERE codigo_materia = @codigoMateria";
 
-                _sqlCommand.Parameters.AddWithValue("@id", id);
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
 
                 _sqlConnection.Open();
 
@@ -78,14 +67,14 @@ namespace BibliotecaEntidades.DAO
                 {
                     if (dataReader.Read())
                     {
-                        datos = (Materia)dataReader;
+                        materia = (Materia)dataReader;
                     }
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -95,9 +84,9 @@ namespace BibliotecaEntidades.DAO
                 }
             }
 
-            return datos;
+            return materia;
         }
-        public static int Add(Materia datos)
+        public int Add(Materia datos)
         {
             int filas = 0;
             try
@@ -116,9 +105,9 @@ namespace BibliotecaEntidades.DAO
 
                 filas = _sqlCommand.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -131,7 +120,7 @@ namespace BibliotecaEntidades.DAO
             return filas;
         }
 
-        public static int Update(int id, Materia datos)
+        public int Update(int id, Materia datos)
         {
             int filas = 0;
             try
@@ -152,9 +141,9 @@ namespace BibliotecaEntidades.DAO
 
                 filas = _sqlCommand.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -167,7 +156,7 @@ namespace BibliotecaEntidades.DAO
             return filas;
         }
 
-        public static int Delete(int id)
+        public int Delete(int id)
         {
             int filas = 0;
             try
@@ -182,9 +171,9 @@ namespace BibliotecaEntidades.DAO
 
                 filas = _sqlCommand.ExecuteNonQuery();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
             finally
             {
@@ -195,6 +184,408 @@ namespace BibliotecaEntidades.DAO
             }
 
             return filas;
+        }
+
+
+        //metodos estado alumno
+
+        public List<EstadoAlumno> GetAll(int codigoMateria)
+        {
+            List<EstadoAlumno> datos = new List<EstadoAlumno>();
+
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+
+                _sqlCommand.CommandText = "SELECT e.*, m.nombre AS nombre_materia, CONCAT(u.apellido, ' ', u.nombre) AS nombre_completo" +
+                    "FROM estado_alumno_en_materia AS e" +
+                    "INNER JOIN usuarios AS u ON e.id_alumno = u.id_usuario" +
+                    "INNER JOIN materias AS m ON e.id_materia = m.id_materia" +
+                    "WHERE m.codigo_materia = @codigoMateria";
+
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+
+                        datos.Add((EstadoAlumno)dataReader);
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return datos;
+        }
+
+        public EstadoAlumno? Get(int codigoMateria, int dniAlumno)
+        {
+            EstadoAlumno? datos = null;
+
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+
+                _sqlCommand.CommandText = "SELECT e.*, m.nombre AS nombre_materia, CONCAT(u.apellido, ' ', u.nombre) AS nombre_completo" +
+                    "FROM estado_alumno_en_materia AS e" +
+                    "INNER JOIN usuarios AS u ON e.id_alumno = u.id_usuario" +
+                    "INNER JOIN materias AS m ON e.id_materia = m.id_materia" +
+                    "WHERE m.codigo_materia = @codigoMateria AND u.dni = @dniAlumno";
+
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+                _sqlCommand.Parameters.AddWithValue("@dniAlumno", dniAlumno);
+
+
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    if (dataReader.Read())
+                    {
+
+                        datos = (EstadoAlumno)dataReader;
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return datos;
+        }
+
+        public int Add(int codigoMateria, int dniAlumno, EstadoAlumno datos)
+        {
+            int filas = 0;
+            try
+            {
+                
+                _sqlCommand.Parameters.Clear();
+
+                _sqlConnection.Open();
+
+                _sqlCommand.CommandText = "INSERT INTO estado_alumno_en_materia" +
+                    "(id_materia, id_usuario, primero_rendido, primer_nota, segundo_rendido, " +
+                    "segunda_nota, asistencia, id_estado_materia, id_estado_alumno)" +
+                    "SELECT m.id_materia, a.id_usuario, @primerParcialRendido" +
+                    "@primerParcialNota, @segundoParcialRendido, @segundoParcialNota, " +
+                    "@asistencia, @estadoMateria, @estadoAlumno" +
+                    "FROM usuarios AS a" +
+                    "CROSS JOIN materias AS m" +
+                    "WHERE m.codigo_materia = @codigoMateria AND u.dni = @dniAlumno";
+
+                _sqlCommand.Parameters.AddWithValue("@dniAlumno", dniAlumno);
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+
+                _sqlCommand.Parameters.AddWithValue("@primerParcialRendido", datos.PrimerExamen.Rendido);
+                _sqlCommand.Parameters.AddWithValue("@primerParcialNota", datos.PrimerExamen.Nota);
+                _sqlCommand.Parameters.AddWithValue("@segundoParcialRendido", datos.SegundoExamen.Rendido);
+                _sqlCommand.Parameters.AddWithValue("@segundoParcialNota", datos.SegundoExamen.Nota);
+                _sqlCommand.Parameters.AddWithValue("@segundoParcialNota", datos.Asistencia);
+                _sqlCommand.Parameters.AddWithValue("@segundoParcialNota", (int)datos.EstadoMateria);
+                _sqlCommand.Parameters.AddWithValue("@segundoParcialNota", (int)datos.Estado);
+
+
+                filas = _sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return filas;
+        }
+
+        public int Update(int codigoMateria, int dniAlumno, EstadoAlumno datos)
+        {
+            int filas = 0;
+            try
+            {
+
+                _sqlCommand.Parameters.Clear();
+
+                _sqlConnection.Open();
+
+                _sqlCommand.CommandText = "UPDATE ea SET ea.primero_rendido = @primerParcialRendido, " +
+                    "ea.primer_nota = @primerParcialNota, ea.segundo_rendido = @segundoParcialRendido, " +
+                    "ea.segunda_nota = @segundoParcialNota, ea.asistencia = @asistencia, " +
+                    "ea.id_estado_materia = @estadoMateria, ea.id_estado_alumno = @estadoAlumno" +
+                    "FROM estado_alumno_en_materia AS ea" +
+                    "CROSS usuarios AS a" +
+                    "CROSS JOIN materias AS m" +
+                    "WHERE m.codigo_materia = @codigoMateria AND u.dni = @dniAlumno " +
+                    "AND ea.id_materia = m.id AND ea.id_alumno = a.id";
+
+
+
+                _sqlCommand.Parameters.AddWithValue("@dniAlumno", dniAlumno);
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+
+                _sqlCommand.Parameters.AddWithValue("@primerParcialRendido", datos.PrimerExamen.Rendido);
+                _sqlCommand.Parameters.AddWithValue("@primerParcialNota", datos.PrimerExamen.Nota);
+                _sqlCommand.Parameters.AddWithValue("@segundoParcialRendido", datos.SegundoExamen.Rendido);
+                _sqlCommand.Parameters.AddWithValue("@segundoParcialNota", datos.SegundoExamen.Nota);
+                _sqlCommand.Parameters.AddWithValue("@asistencia", datos.Asistencia);
+                _sqlCommand.Parameters.AddWithValue("@estadoMateria", (int)datos.EstadoMateria);
+                _sqlCommand.Parameters.AddWithValue("@estadoAlumno", (int)datos.Estado);
+
+
+                filas = _sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return filas;
+        }
+
+        public int AgregarExamen(int codigoMateria, EExamen examen)
+        {
+            int filas = 0;
+            string command = "";
+            try
+            {
+                if(examen == EExamen.Primer)
+                {
+                    command = "UPDATE materias SET primer_parcial_asginado = @parcialAsignado " +
+                    "WHERE materias = @codigoMateria";
+                } 
+                else if (examen == EExamen.Segundo)
+                {
+                    command = "UPDATE materias SET segundo_parcial_asginado = @parcialAsignado " +
+                    "WHERE materias = @codigoMateria";
+                }
+                _sqlCommand.Parameters.Clear();
+
+                _sqlConnection.Open();
+
+                _sqlCommand.CommandText = command;
+                    
+
+
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+                _sqlCommand.Parameters.AddWithValue("@parcialAsignado", true);
+
+                
+
+                filas = _sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return filas;
+        }
+
+        public int AgregarProfesor(int codigoMateria, int dniProfesor)
+        {
+            int filas = 0;
+            try
+            {
+
+                _sqlCommand.Parameters.Clear();
+
+                _sqlConnection.Open();
+
+                _sqlCommand.CommandText = "INSERT INTO profesores_en_materia" +
+                    "(id_profesor, id_materia)" +
+                    "SELECT m.id_materia, a.id_usuario" +
+                    "FROM usuarios AS a" +
+                    "CROSS JOIN materias AS m" +
+                    "WHERE m.codigo_materia = @codigoMateria AND u.dni = @dniAlumno";
+
+                _sqlCommand.Parameters.AddWithValue("@dniAlumno", dniProfesor);
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+               
+
+                filas = _sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return filas;
+        }
+
+        public List<Profesor> GetAllProfesores(int codigoMateria)
+        {
+            List<Profesor> datos = new List<Profesor>();
+
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+
+                _sqlCommand.CommandText = "SELECT u.*" +
+                    "FROM profesores_en_materias AS pm" +
+                    "INNER JOIN usuarios AS u ON u.id_usuario = pm.id_profesor" +
+                    "INNER JOIN materias AS m ON m.id_materia = pm.id_materia" +
+                    "WHERE m.codigo_materia = @codigoMateria";
+
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+
+                        datos.Add((Profesor)dataReader);
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return datos;
+        }
+
+        public List<Materia> ListarMateriasDelAlumno(int dni)
+        {
+            List<Materia> datos = new List<Materia>();
+
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+                _sqlCommand.CommandText = "SELECT m.* FROM materias AS m" +
+                    "INNER JOIN usuarios AS u ON m.id_alumno = u.id" +
+                    "INNER JOIN estado_alumno_en_materia AS ea ON ea.id_alumno = u.id" +
+                    "WHERE u.dni = @dni";
+                _sqlCommand.Parameters.AddWithValue("@dni", dni);
+
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+
+                        datos.Add((Materia)dataReader);
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return datos;
+        }
+        public List<Materia> ListarMateriasDelProfesor(int dni)
+        {
+            List<Materia> datos = new List<Materia>();
+
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+                _sqlCommand.CommandText = "SELECT m.* FROM materias AS m" +
+                    "INNER JOIN profesores_en_materia AS pm ON pm.id_materia = m.id" +
+                    "INNER JOIN usuarios AS u ON u.id = pm.id_profesor" +
+                    "WHERE u.dni = @dni";
+                _sqlCommand.Parameters.AddWithValue("@dni", dni);
+
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+
+                        datos.Add((Materia)dataReader);
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return datos;
         }
     }
 }

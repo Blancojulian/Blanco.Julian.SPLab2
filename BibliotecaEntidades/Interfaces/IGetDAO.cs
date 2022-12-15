@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BibliotecaEntidades.DAO
+namespace BibliotecaEntidades.Interfaces
 {
-    public static class ProfesoresEnMateriasDAO
+    public interface IGetDAO
     {
     }
 }
