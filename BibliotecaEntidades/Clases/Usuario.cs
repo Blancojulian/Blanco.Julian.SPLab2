@@ -21,6 +21,10 @@ namespace BibliotecaEntidades.Clases
         public int Dni { get => _dni; set => _dni = value; }
         public ENivelUsuario NivelUsuario { get => _nivelUsuario; }
 
+        public Usuario()
+        {
+
+        }
         public Usuario(int id, string nombre, string apellido, int dni)
         {
             _id = id;

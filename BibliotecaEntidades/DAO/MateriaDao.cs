@@ -515,8 +515,8 @@ namespace BibliotecaEntidades.DAO
             {
                 _sqlCommand.Parameters.Clear();
                 _sqlCommand.CommandText = "SELECT m.* FROM materias AS m" +
-                    "INNER JOIN usuarios AS u ON m.id_alumno = u.id" +
-                    "INNER JOIN estado_alumno_en_materia AS ea ON ea.id_alumno = u.id" +
+                    "INNER JOIN estado_alumno_en_materia AS ea ON ea.id_materia = m.id" +
+                    "INNER JOIN usuarios AS u ON u.id = ea.id_alumno" +
                     "WHERE u.dni = @dni";
                 _sqlCommand.Parameters.AddWithValue("@dni", dni);
 
@@ -568,6 +568,47 @@ namespace BibliotecaEntidades.DAO
                     {
 
                         datos.Add((Materia)dataReader);
+
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                {
+                    _sqlConnection.Close();
+                }
+            }
+
+            return datos;
+        }
+
+        public List<Alumno> ListarAlumnoDeMateria(int codigoMateria)
+        {
+            List<Alumno> datos = new List<Alumno>();
+
+            try
+            {
+                _sqlCommand.Parameters.Clear();
+                _sqlCommand.CommandText = "SELECT a.* FROM usuarios AS a" +
+                    "INNER JOIN estado_alumno_en_materia AS ea ON ea.id_alumno = u.id" +
+                    "INNER JOIN materias AS m ON m.id = ea.id_materia" +
+                    "WHERE m.codigo_materia = @codigoMateria AND a.id_nivel_usuario = 3";
+                _sqlCommand.Parameters.AddWithValue("@codigoMateria", codigoMateria);
+
+                _sqlConnection.Open();
+
+                using (SqlDataReader dataReader = _sqlCommand.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+
+                        datos.Add((Alumno)dataReader);
 
                     }
                 }

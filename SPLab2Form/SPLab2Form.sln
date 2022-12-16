@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPLab2Form", "SPLab2Form.csproj", "{01D1D8DB-B6EE-4FAC-ACFB-AC97DA3A72B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SPLab2Form", "SPLab2Form.csproj", "{01D1D8DB-B6EE-4FAC-ACFB-AC97DA3A72B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BibliotecaEntidades", "..\BibliotecaEntidades\BibliotecaEntidades.csproj", "{ED1449CF-E388-4325-ACCF-B2133F319CB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BibliotecaEntidades", "..\BibliotecaEntidades\BibliotecaEntidades.csproj", "{ED1449CF-E388-4325-ACCF-B2133F319CB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

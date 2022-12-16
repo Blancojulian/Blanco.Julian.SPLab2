@@ -15,6 +15,16 @@ namespace PPLab2Form.Forms
 {
     public partial class FrmAdmin : Form
     {
+        delegate bool SerializarAlumnos(List<Alumno> alumnos, string materia);
+        delegate List<Alumno> DeserializarAlumnos(string materia);
+
+        SerializarAlumnos serializarJson = JSON.SerializarJSON;
+        SerializarAlumnos serializarXML = XML.SerializarXml;
+
+        DeserializarAlumnos deserializarJson = JSON.DeserializarJSON;
+        DeserializarAlumnos deserializarXML = XML.DeserializarXml;
+
+
         private Admin _admin;
 
         public FrmAdmin(Admin admin)
@@ -28,7 +38,7 @@ namespace PPLab2Form.Forms
             ConfiguarForm();
             ConfigurarDataGrid();
             CargarDataGrid();
-            
+
         }
 
         private void Refrescar()
@@ -39,7 +49,7 @@ namespace PPLab2Form.Forms
             dtgv_materias.Refresh();
 
             dtgv_materias.ClearSelection();
-            
+
 
         }
         private void ConfigurarDataGrid()
@@ -59,7 +69,7 @@ namespace PPLab2Form.Forms
 
             this.dtgv_materias.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
-            
+
 
         }
 
@@ -75,8 +85,8 @@ namespace PPLab2Form.Forms
 
             this.dtgv_materias.Columns["MateriaCorrelativa"].Visible = false;
             this.dtgv_materias.Columns["ListaAlumnos"].Visible = false;
-            this.dtgv_materias.Columns["MostrarPrimerExamenAsignado"].Visible = false;
-            this.dtgv_materias.Columns["MostrarSegundoExamenAsignado"].Visible = false;
+            this.dtgv_materias.Columns["PrimerExamen"].Visible = false;
+            this.dtgv_materias.Columns["SegundoExamen"].Visible = false;
 
 
 
@@ -120,7 +130,7 @@ namespace PPLab2Form.Forms
 
         private void msi_cambiarEstado_Click(object sender, EventArgs e)
         {
-            if(dtgv_materias.SelectedRows.Count > 0)
+            if (dtgv_materias.SelectedRows.Count > 0)
             {
                 Materia materia = (Materia)dtgv_materias.CurrentRow.DataBoundItem;
                 FrmEstadoAlumno frm = new FrmEstadoAlumno(_admin, materia);
@@ -155,10 +165,9 @@ namespace PPLab2Form.Forms
 
                 if (respuesta == DialogResult.OK)
                 {
-                    
-                    if (frm.Profesor is not null)
+
+                    if (frm.Profesor is not null && _admin.AgregarProfesorAMateria(materia.CodigoMateria, frm.Profesor.Dni) > 0)
                     {
-                        _admin.AgregarProfesorAMateria(materia.CodigoMateria, frm.Profesor.Dni);
                         MessageBox.Show($"Se agrego el profesor {frm.Profesor.Apellido} {frm.Profesor.Nombre} a la materia {materia.Nombre}");
                         Refrescar();
                     }
@@ -176,7 +185,7 @@ namespace PPLab2Form.Forms
             }
         }
 
-       
+
 
         private void ConfiguarForm()
         {
@@ -188,22 +197,7 @@ namespace PPLab2Form.Forms
             this.FormBorderStyle = FormBorderStyle.None;
             this.BackColor = Color.FromArgb(55, 94, 151);
         }
-        
 
-        private void msi_calcularLaNotaPromedio_Click(object sender, EventArgs e)
-        {
-            FrmPromedioNotas frm = new FrmPromedioNotas();
-            DialogResult respuesta = frm.ShowDialog();
-
-            if (respuesta == DialogResult.OK)
-            {
-
-            }
-            else if (respuesta == DialogResult.Cancel)
-            {
-                MessageBox.Show("Se cancelo la operación");
-            }
-        }
 
         private void msi_asignarAlumno_Click(object sender, EventArgs e)
         {
@@ -238,6 +232,80 @@ namespace PPLab2Form.Forms
         private void cerrarSesiónToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+
+
+        private void msi_exportarAJson_Click(object sender, EventArgs e)
+        {
+            if (dtgv_materias.SelectedRows.Count > 0)
+            {
+                try
+                {
+                    Materia materia = (Materia)dtgv_materias.CurrentRow.DataBoundItem;
+                    List<Alumno> alumnos = ClaseDAO.MateriaDao.ListarAlumnoDeMateria(materia.CodigoMateria);
+
+                    if (string.IsNullOrEmpty(tbx_nombreArchivo.Text))
+                    {
+                        throw new Exception("Error, debe escribir un numbre para el archivo");
+                    }
+
+                    if (serializarJson(alumnos, tbx_nombreArchivo.Text))
+                    {
+                        MessageBox.Show("Se serializo correctamente.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("Tiene que seleccionar una materia");
+
+            }
+        }
+
+        private void msi_importarAJson_Click(object sender, EventArgs e)
+        {
+            if (dtgv_materias.SelectedRows.Count > 0)
+            {
+                try
+                {
+                    Materia materia = (Materia)dtgv_materias.CurrentRow.DataBoundItem;
+                    List<Alumno> alumnos;// = new List<Alumno>();//ClaseDAO.MateriaDao.ListarAlumnoDeMateria(materia.CodigoMateria);
+
+                    if (string.IsNullOrEmpty(tbx_nombreArchivo.Text))
+                    {
+                        throw new Exception("Error, debe escribir un nombre del archivo que desea serealizar");
+                    }
+
+                    alumnos = deserializarJson(tbx_nombreArchivo.Text);
+                    if (alumnos.Count > 0)
+                    {
+                        foreach (Alumno alumno in alumnos)
+                        {
+                            ClaseDAO.UsuarioDao.Add(alumno);
+                            ClaseDAO.MateriaDao.Add(materia.CodigoMateria, alumno.Dni, new EstadoAlumno());
+                        }
+                        MessageBox.Show("Se ha deserializado correctamente", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("Tiene que seleccionar una materia a la que se van a cargar los alumnos");
+
+            }
         }
     }
 }

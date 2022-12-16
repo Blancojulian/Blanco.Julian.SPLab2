@@ -37,13 +37,15 @@
             this.msi_crear = new System.Windows.Forms.ToolStripMenuItem();
             this.msi_crearUsuario = new System.Windows.Forms.ToolStripMenuItem();
             this.msi_crearMateria = new System.Windows.Forms.ToolStripMenuItem();
-            this.estadisticasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.msi_calcularCantidadDeAlumnos = new System.Windows.Forms.ToolStripMenuItem();
-            this.msi_calcularLaNotaPromedio = new System.Windows.Forms.ToolStripMenuItem();
             this.msi_asignarAlumno = new System.Windows.Forms.ToolStripMenuItem();
             this.cerrarSesiónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbl_materias = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.serializaciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.msi_exportarAJson = new System.Windows.Forms.ToolStripMenuItem();
+            this.msi_importarAJson = new System.Windows.Forms.ToolStripMenuItem();
+            this.tbx_nombreArchivo = new System.Windows.Forms.TextBox();
+            this.lbl_nombreArchivo = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dtgv_materias)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -74,8 +76,8 @@
             this.msi_cambiarEstado,
             this.msi_asignarProfesorAMateria,
             this.msi_crear,
-            this.estadisticasToolStripMenuItem,
-            this.msi_asignarAlumno});
+            this.msi_asignarAlumno,
+            this.serializaciónToolStripMenuItem});
             this.menuToolStripMenuItem.Name = "menuToolStripMenuItem";
             this.menuToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
             this.menuToolStripMenuItem.Text = "Menu";
@@ -117,29 +119,6 @@
             this.msi_crearMateria.Text = "Crear Materia";
             this.msi_crearMateria.Click += new System.EventHandler(this.msi_crearMateria_Click);
             // 
-            // estadisticasToolStripMenuItem
-            // 
-            this.estadisticasToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.msi_calcularCantidadDeAlumnos,
-            this.msi_calcularLaNotaPromedio});
-            this.estadisticasToolStripMenuItem.Name = "estadisticasToolStripMenuItem";
-            this.estadisticasToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
-            this.estadisticasToolStripMenuItem.Text = "Estadisticas";
-            // 
-            // msi_calcularCantidadDeAlumnos
-            // 
-            this.msi_calcularCantidadDeAlumnos.Name = "msi_calcularCantidadDeAlumnos";
-            this.msi_calcularCantidadDeAlumnos.Size = new System.Drawing.Size(299, 22);
-            this.msi_calcularCantidadDeAlumnos.Text = "Calcular cantidad de alumnos por profesor";
-            //this.msi_calcularCantidadDeAlumnos.Click += new System.EventHandler(this.msi_calcularCantidadDeAlumnos_Click);
-            // 
-            // msi_calcularLaNotaPromedio
-            // 
-            this.msi_calcularLaNotaPromedio.Name = "msi_calcularLaNotaPromedio";
-            this.msi_calcularLaNotaPromedio.Size = new System.Drawing.Size(299, 22);
-            this.msi_calcularLaNotaPromedio.Text = "Calcular la nota promedio de cada alumno";
-            this.msi_calcularLaNotaPromedio.Click += new System.EventHandler(this.msi_calcularLaNotaPromedio_Click);
-            // 
             // msi_asignarAlumno
             // 
             this.msi_asignarAlumno.Name = "msi_asignarAlumno";
@@ -169,11 +148,52 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
+            // serializaciónToolStripMenuItem
+            // 
+            this.serializaciónToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.msi_exportarAJson,
+            this.msi_importarAJson});
+            this.serializaciónToolStripMenuItem.Name = "serializaciónToolStripMenuItem";
+            this.serializaciónToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.serializaciónToolStripMenuItem.Text = "Serialización";
+            // 
+            // msi_exportarAJson
+            // 
+            this.msi_exportarAJson.Name = "msi_exportarAJson";
+            this.msi_exportarAJson.Size = new System.Drawing.Size(155, 22);
+            this.msi_exportarAJson.Text = "Exportar a Json";
+            this.msi_exportarAJson.Click += new System.EventHandler(this.msi_exportarAJson_Click);
+            // 
+            // msi_importarAJson
+            // 
+            this.msi_importarAJson.Name = "msi_importarAJson";
+            this.msi_importarAJson.Size = new System.Drawing.Size(155, 22);
+            this.msi_importarAJson.Text = "Importar a Json";
+            this.msi_importarAJson.Click += new System.EventHandler(this.msi_importarAJson_Click);
+            // 
+            // tbx_nombreArchivo
+            // 
+            this.tbx_nombreArchivo.Location = new System.Drawing.Point(685, 37);
+            this.tbx_nombreArchivo.Name = "tbx_nombreArchivo";
+            this.tbx_nombreArchivo.Size = new System.Drawing.Size(137, 23);
+            this.tbx_nombreArchivo.TabIndex = 3;
+            // 
+            // lbl_nombreArchivo
+            // 
+            this.lbl_nombreArchivo.AutoSize = true;
+            this.lbl_nombreArchivo.Location = new System.Drawing.Point(589, 40);
+            this.lbl_nombreArchivo.Name = "lbl_nombreArchivo";
+            this.lbl_nombreArchivo.Size = new System.Drawing.Size(93, 15);
+            this.lbl_nombreArchivo.TabIndex = 4;
+            this.lbl_nombreArchivo.Text = "Nombre archivo";
+            // 
             // FrmAdmin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(869, 450);
+            this.Controls.Add(this.lbl_nombreArchivo);
+            this.Controls.Add(this.tbx_nombreArchivo);
             this.Controls.Add(this.lbl_materias);
             this.Controls.Add(this.dtgv_materias);
             this.Controls.Add(this.menuStrip1);
@@ -202,9 +222,11 @@
         private ToolStripMenuItem msi_crearUsuario;
         private ToolStripMenuItem msi_crearMateria;
         private ToolStripMenuItem cerrarSesiónToolStripMenuItem;
-        private ToolStripMenuItem estadisticasToolStripMenuItem;
-        private ToolStripMenuItem msi_calcularCantidadDeAlumnos;
-        private ToolStripMenuItem msi_calcularLaNotaPromedio;
         private ToolStripMenuItem msi_asignarAlumno;
+        private ToolStripMenuItem serializaciónToolStripMenuItem;
+        private ToolStripMenuItem msi_exportarAJson;
+        private ToolStripMenuItem msi_importarAJson;
+        private TextBox tbx_nombreArchivo;
+        private Label lbl_nombreArchivo;
     }
 }

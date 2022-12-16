@@ -1,5 +1,6 @@
 ﻿using BibliotecaEntidades.DAO;
 using BibliotecaEntidades.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -14,7 +15,10 @@ namespace BibliotecaEntidades.Clases
         private int _cantidadMaterias;
 
 
+        public Alumno()
+        {
 
+        }
         public Alumno(int id, string nombre, string apellido, int dni) : base(id, nombre, apellido, dni)
         {
             this._cantidadMaterias = 0;
@@ -23,7 +27,7 @@ namespace BibliotecaEntidades.Clases
         public Alumno( string nombre, string apellido, int dni) : this(0, nombre, apellido, dni)
         {
         }
-
+        [JsonIgnore]
         public int CantidadMaterias {get => _cantidadMaterias; }
 
 

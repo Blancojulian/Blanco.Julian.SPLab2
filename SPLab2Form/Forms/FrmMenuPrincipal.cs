@@ -1,4 +1,4 @@
-﻿using BibliotecaEntidades.Entidades;
+﻿using BibliotecaEntidades.Clases;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,13 +13,13 @@ namespace PPLab2Form.Forms
 {
     public partial class FrmMenuPrincipal : Form
     {
-        private NivelUsuario _nivelUsuario;
+        private ENivelUsuario _nivelUsuario;
         private FrmAdmin? _frmAdmin;
         private FrmProfesor? _frmProfesor;
         private FrmAlumno? _frmAlumno;
         private FrmLogin? _frmLogin;
 
-        public NivelUsuario NivelUsuario { get => _nivelUsuario; set => _nivelUsuario = value; }
+        public ENivelUsuario NivelUsuario { get => _nivelUsuario; set => _nivelUsuario = value; }
 
         public FrmMenuPrincipal()
         {
@@ -49,13 +49,13 @@ namespace PPLab2Form.Forms
                 
                 switch (_frmLogin.NivelUsuario)
                 {
-                    case NivelUsuario.Admin:
+                    case ENivelUsuario.Admin:
                         AbrirFormAdmin((Admin)_frmLogin.Usuario);
                         break;
-                    case NivelUsuario.Profesor:
+                    case ENivelUsuario.Profesor:
                         AbrirFormProfesor((Profesor)_frmLogin.Usuario);
                         break;
-                    case NivelUsuario.Alumno:
+                    case ENivelUsuario.Alumno:
                         AbrirFormAlumno((Alumno)_frmLogin.Usuario);
                         break;
                     default:

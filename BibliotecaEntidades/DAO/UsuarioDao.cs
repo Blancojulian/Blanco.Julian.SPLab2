@@ -368,5 +368,21 @@ namespace BibliotecaEntidades.DAO
 
             return usuario;
         }
+
+        public T? RecuperarContrasenia<T>() where T : Usuario
+        {
+            T usuario = default; 
+            List<T> datos= GetAll<T>();
+
+            foreach(T t in datos)
+            {
+                if (t is not null)
+                {
+                    usuario = t;
+                    break;
+                }
+            }
+            return usuario;
+        }
     }
 }

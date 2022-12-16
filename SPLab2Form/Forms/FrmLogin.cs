@@ -1,4 +1,5 @@
-﻿using BibliotecaEntidades.Entidades;
+﻿using BibliotecaEntidades.Clases;
+using BibliotecaEntidades.DAO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,10 +14,10 @@ namespace PPLab2Form.Forms
 {
     public partial class FrmLogin : Form
     {
-        private NivelUsuario _nivelUsuario;
+        private ENivelUsuario _nivelUsuario;
         private Usuario _usuario;
 
-        public NivelUsuario NivelUsuario { get => _nivelUsuario; }
+        public ENivelUsuario NivelUsuario { get => _nivelUsuario; }
         public Usuario Usuario { get => _usuario; }
 
         public FrmLogin()
@@ -31,36 +32,28 @@ namespace PPLab2Form.Forms
             
             if(int.TryParse(this.tbx_dni.Text, out dni))
             {
-                Usuario? usuario = Sistema.Usuarios.ComprobarLogin(this.tbx_nombre.Text, this.tbx_contrasenia.Text, dni);
+                Usuario? usuario = ClaseDAO.UsuarioDao.ComprobarLogin<Usuario>(this.tbx_nombre.Text, this.tbx_contrasenia.Text, dni);//Sistema.Usuarios.ComprobarLogin(this.tbx_nombre.Text, this.tbx_contrasenia.Text, dni);
                 
                 if (usuario is not null)
                 {
                     
                     switch (usuario.NivelUsuario)
                     {
-                        case NivelUsuario.Admin:
-
-
-                            //FrmAdmin frmAAdmin = new FrmAdmin((Admin)usuario);
-                            //frmAAdmin.Show();
-                            //this.Hide();
-                            _nivelUsuario = NivelUsuario.Admin;
+                        case ENivelUsuario.Admin:
+                                                        
+                            _nivelUsuario = ENivelUsuario.Admin;
                             _usuario = usuario;
                             this.Close();
                             break;
-                        case NivelUsuario.Profesor:
-                            //FrmProfesor frmProfesor = new FrmProfesor((Profesor)usuario);
-                            //frmProfesor.Show();
-                            //this.Hide();
-                            _nivelUsuario = NivelUsuario.Profesor;
+                        case ENivelUsuario.Profesor:
+                            
+                            _nivelUsuario = ENivelUsuario.Profesor;
                             _usuario = usuario;
                             this.Close();
                             break;
-                        case NivelUsuario.Alumno:
-                            //FrmAlumno frmAlumno = new FrmAlumno((Alumno)usuario);
-                            //frmAlumno.Show();
-                            //this.Hide();
-                            _nivelUsuario = NivelUsuario.Alumno;
+                        case ENivelUsuario.Alumno:
+                            
+                            _nivelUsuario = ENivelUsuario.Alumno;
                             _usuario = usuario;
                             this.Close();
                             break;
@@ -90,16 +83,16 @@ namespace PPLab2Form.Forms
         private void FrmLogin_Load(object sender, EventArgs e)
         {
             ConfiguarForm();
-            cbx_tipoUsuario.DataSource = Enum.GetValues(typeof(NivelUsuario));
-            cbx_tipoUsuario.SelectedItem = NivelUsuario.Alumno;
+            cbx_tipoUsuario.DataSource = Enum.GetValues(typeof(ENivelUsuario));
+            cbx_tipoUsuario.SelectedItem = ENivelUsuario.Alumno;
         }
 
         private void btn_cargarDatos_Click(object sender, EventArgs e)
         {
-            List<Usuario> listaUsuarios = Sistema.Usuarios.GetLista;
+            List<Usuario> listaUsuarios = ClaseDAO.UsuarioDao.GetAll();
             List<Usuario> listaPorTipo = new List<Usuario>();
             Usuario? usuario = null;
-            NivelUsuario nivelUsuario = (NivelUsuario)this.cbx_tipoUsuario.SelectedItem;
+            ENivelUsuario nivelUsuario = (ENivelUsuario)this.cbx_tipoUsuario.SelectedItem;
 
             foreach (Usuario u in listaUsuarios)
             {
@@ -122,7 +115,7 @@ namespace PPLab2Form.Forms
             {
                 tbx_nombre.Text = usuario.Nombre;
                 tbx_dni.Text = $"{usuario.Dni}";
-                tbx_contrasenia.Text = Usuario.RecuperarContrasenia(usuario);
+                tbx_contrasenia.Text = "123";
 
             }
 
